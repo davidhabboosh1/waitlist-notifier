@@ -9,14 +9,21 @@ from selenium.webdriver.chrome.options import Options
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
+from flask import Flask
+from flask import request
 
+app = Flask(__name__)
 
 def setup():
     # get usernames and passwords
-    email = input('What is your gmail? ')
-    email_pss = input('What is your gmail password? ')
-    neu_usr = input('What is your Northeastern SSO username? ')
-    neu_pss = input('What is your Northeastern SSO password? ')
+    email = request.args.get('email')
+    email_pss = request.args.get('email_pss')
+    neu_usr = request.args.get('neu_usr')
+    neu_pss = request.args.get('neu_pss')
+    # email = input('What is your gmail? ')
+    # email_pss = input('What is your gmail password? ')
+    # neu_usr = input('What is your Northeastern SSO username? ')
+    # neu_pss = input('What is your Northeastern SSO password? ')
 
     # set up mail
     global mail
@@ -75,7 +82,7 @@ def get_pos():
         driver.find_element(
             By.XPATH, '//tr[th[contains(., "Waitlist Position")]]/td').text)
 
-
+@app.route('/main')
 def main():
     setup()
     global mail
@@ -90,7 +97,17 @@ def main():
             cur_pos = pos
 
         time.sleep(600)
+    
+@app.route('/')
+def index():
+    return '''<form action="/main" method="get">
+                <input type="text" name="email" placeholder="gmail">
+                <input type="text" name="email_pss" placeholder="gmail password">
+                <input type="text" name="neu_usr" placeholder="NEU SSO login">
+                <input type="text" name="neu_pss" placeholder = "NEU SSO password">
+                <input type="submit" value="Start">
+              </form>'''
 
 
 if __name__ == '__main__':
-    main()
+    app.run(host='127.0.0.1', port=8080, debug=True)
